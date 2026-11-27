@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BRUTO — Energia sem filtro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Plus+Jakarta+Sans:wght@400&family=Space+Grotesk:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* ---------- Tokens (do Figma) ---------- */
+    :root {
+      --yellow: #ffcc00;          /* Colors/Yellow (texto das pílulas) */
+      --bg: #f4f4f5;
+      --zinc-300: #d4d4d8;
+
+      --font-display: "Archivo Black", system-ui, sans-serif;
+      --font-ui: "Space Grotesk", system-ui, sans-serif;
+      --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+
+      /* 1 "px do Figma" na tela atual: o frame 1440×1024 sempre cabe inteiro */
+      --px: min(calc(100vw / 1440), calc(100dvh / 1024));
+
+      --ease: cubic-bezier(.65, 0, .25, 1);
+      --dur: .8s;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      background: #fff;
+      color: #000;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+
+    /* Centraliza um elemento no ponto (x, y) do Figma */
+    .at {
+      position: absolute;
+      left: calc(var(--x) * var(--px));
+      top: calc(var(--y) * var(--px));
+      transform: translate(-50%, -50%);
+    }
+
+    /* ======================= HEADER ======================= */
+    .header {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      background:
+        linear-gradient(180deg, #fff 0%, var(--bg) 65%, var(--zinc-300) 100%)
+        bottom / 100% calc(264 * var(--px)) no-repeat,
+        #fff;
+    }
+    .header__inner {
+      position: relative;
+      width: calc(1440 * var(--px));
+      height: calc(264 * var(--px));
+    }
+
+    .logo {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: calc(375 * var(--px));
+      height: calc(299 * var(--px));
+      transform: translateX(-50%);
+    }
+    .logo img { display: block; width: 100%; height: 100%; }
+
+    .tagline {
+      --x: 720.5;
+      --y: 183.5;
+      font: 700 calc(16 * var(--px)) / normal var(--font-ui);
+      letter-spacing: calc(4.8 * var(--px));
+      white-space: nowrap;
+    }
+
+    .nav a {
+      --y: 113.5;
+      width: calc(176 * var(--px));
+      font: 700 calc(16 * var(--px)) / normal var(--font-ui);
+      letter-spacing: calc(4.8 * var(--px));
+      text-align: center;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .nav a::after {
+      content: "";
+      display: block;
+      width: calc(24 * var(--px));
+      height: 2px;
+      margin: calc(6 * var(--px)) auto 0;
+      background: currentColor;
+      transform: scaleX(0);
+      transition: transform .25s ease;
+    }
+    .nav a:hover::after,
+    .nav a:focus-visible::after { transform: scaleX(1); }
+    .nav a:focus-visible { outline: 2px solid #000; outline-offset: 4px; }
+
+    /* ======================= HERO (acordeão) ======================= */
+    /* Ordem fixa: Manga | Guaraná | Açaí | Coco.
+       O sabor ativo ocupa 5fr (900px do Figma), os outros 1fr (180px).
+       Trocar o ativo anima as colunas, como a transição entre os frames. */
+    .hero {
+      position: relative;
+      z-index: 2;
+      height: calc(760 * var(--px));
+      flex: none;
+    }
+    .hero__cols,
+    .hero__cans {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: var(--c1) var(--c2) var(--c3) var(--c4);
+      transition: grid-template-columns var(--dur) var(--ease);
+    }
+    .hero { --c1: 1fr; --c2: 1fr; --c3: 1fr; --c4: 1fr; }
+    .hero[data-active="manga"]   { --c1: 5fr; }
+    .hero[data-active="guarana"] { --c2: 5fr; }
+    .hero[data-active="acai"]    { --c3: 5fr; }
+    .hero[data-active="coco"]    { --c4: 5fr; }
+
+    .hero__cans { pointer-events: none; }   /* camada visual, acima das colunas */
+
+    /* ---- Camada 1: colunas (cor + área clicável) ---- */
+    .col {
+      position: relative;
+      background: var(--color);
+      overflow: hidden;
+    }
+    /* gradiente escuro só no sabor expandido */
+    .col::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(102,102,102,.85) 100%);
+      opacity: 0;
+      transition: opacity var(--dur) var(--ease);
+    }
+    .col.is-active::before { opacity: 1; }
+    .col.is-active { cursor: default; }
+    .col:focus-visible { outline: 3px solid #fff; outline-offset: -6px; }
+
+    .manga   { --color: #ffd600; }
+    .guarana { --color: #00b84d; }
+    .acai    { --color: #0038ff; }
+    .coco    { --color: #121215; }
+
+    /* ---- Camada 2: lata, textos e nome de cada sabor ---- */
+    .flavor {
+      position: relative;
+      container-type: inline-size;
+    }
+    /* moldura da lata: no expandido, corta a lata grande nas bordas laterais
+       do painel (como no Figma), sem cortar os textos */
+    .can-frame { position: absolute; inset: 0; }
+    .flavor.is-active .can-frame { overflow: clip visible; }
+
+    /*
+      Cada lata é UMA imagem que se transforma entre os dois estados.
+      --ox/--oy: centro da lata dentro do PNG (ponto de giro e de posição)
+      --w/--h:   tamanho do PNG no estado fechado (lata com ~318px de altura)
+      Fechado: em pé, centralizada na coluna, saltando acima dela.
+      Aberto:  maior e inclinada, ancorada à borda direita do painel.
+    */
+    .can {
+      position: absolute;
+      left: 50%;
+      top: calc(141 * var(--px));
+      width: calc(var(--w) * var(--px));
+      height: calc(var(--h) * var(--px));
+      transform-origin: var(--ox) var(--oy);
+      transform:
+        translate(calc(var(--ox) * -1), calc(var(--oy) * -1))
+        translateY(calc(var(--lift, 0) * var(--px)))
+        rotate(var(--r))
+        scale(var(--s));
+      transition:
+        left var(--dur) var(--ease),
+        top var(--dur) var(--ease),
+        transform var(--dur) var(--ease);
+    }
+    .flavor.is-active .can {
+      left: calc(100% - (900 - var(--cx)) * var(--px));
+      top: calc(var(--cy) * var(--px));
+      --r: var(--r-open);
+      --s: var(--s-open);
+    }
+
+    .manga .can   { --ox: 49.5%; --oy: 50.1%; --w: 300.4; --h: 402.2; --r: -18deg; --s: 1;
+                    --r-open: 0deg;  --s-open: 2.129; --cx: 659.2; --cy: 297.5; }
+    .guarana .can { --ox: 49.7%; --oy: 46.5%; --w: 458;   --h: 543.2; --r: 0deg;   --s: 1;
+                    --r-open: 16deg; --s-open: 2.152; --cx: 670.5; --cy: 302.6; }
+    .acai .can    { --ox: 49.7%; --oy: 46.6%; --w: 458.4; --h: 543.4; --r: 0deg;   --s: 1;
+                    --r-open: 18deg; --s-open: 2.236; --cx: 664.4; --cy: 313; }
+    .coco .can    { --ox: 68.9%; --oy: 46.5%; --w: 331.3; --h: 545.3; --r: 0deg;   --s: 1;
+                    --r-open: 12deg; --s-open: 2.169; --cx: 693.5; --cy: 283.8; }
+
+    /* hover numa coluna fechada: a lata salta */
+    .flavor.is-hover:not(.is-active) .can {
+      --lift: -14;
+      --s: 1.04;
+      transition-duration: .35s;
+    }
+
+    /* nome do sabor na coluna fechada */
+    .flavor-name {
+      position: absolute;
+      left: 50%;
+      top: calc(428 * var(--px));
+      width: calc(140 * var(--px));
+      transform: translate(-50%, -50%);
+      font: 700 calc(20 * var(--px)) / normal var(--font-ui);
+      letter-spacing: calc(6 * var(--px));
+      color: #fff;
+      text-align: center;
+      transition: opacity .3s ease .45s;
+    }
+    .flavor.is-active .flavor-name { opacity: 0; transition-delay: 0s; }
+
+    /* textos do sabor expandido (posições do Figma, relativas ao painel de 900px) */
+    .copy-block {
+      position: absolute;
+      inset: 0 auto 0 calc((100cqw - 900 * var(--px)) / 2);
+      width: calc(900 * var(--px));
+      color: var(--ink, #000);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(calc(16 * var(--px)));
+      transition: opacity .25s ease, transform .25s ease, visibility 0s .25s;
+    }
+    .flavor.is-active .copy-block {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      transition: opacity .5s ease .45s, transform .6s var(--ease) .45s, visibility 0s;
+    }
+    .coco .copy-block { --ink: #f4f4f5; }
+
+    .eyebrow {
+      width: calc(350 * var(--px));
+      font: 400 calc(11 * var(--px)) / normal var(--font-ui);
+      letter-spacing: calc(0.88 * var(--px));
+      color: var(--eyebrow, #655814);
+      text-align: center;
+    }
+    .coco .eyebrow { --eyebrow: #f4f4f5; }
+
+    .title {
+      width: calc(var(--tw, 420) * var(--px));
+      font: 400 calc(52 * var(--px)) / normal var(--font-display);
+      letter-spacing: calc(31.2 * var(--px));
+      text-align: center;
+    }
+
+    .desc {
+      width: calc(420 * var(--px));
+      font: 400 calc(15 * var(--px)) / normal var(--font-body);
+      letter-spacing: calc(1.5 * var(--px));
+      text-align: center;
+    }
+    .desc p + p { margin-top: 1.2em; }
+
+    .pill {
+      position: absolute;
+      left: calc(var(--x) * var(--px));
+      top: calc(var(--y) * var(--px));
+      padding: calc(6 * var(--px)) calc(14 * var(--px));
+      border-radius: 999px;
+      background: rgba(0,0,0,.85);
+      color: var(--yellow);
+      font: 700 calc(11 * var(--px)) / normal var(--font-ui);
+      letter-spacing: calc(1.1 * var(--px));
+      white-space: nowrap;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      :root { --dur: 0s; }
+      .copy-block, .flavor-name { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__inner">
+      <h1 class="logo">
+        <img src="assets/logo-bruto.png" alt="BRUTO" width="760" height="606" />
+      </h1>
+      <p class="tagline at">ENERGIA SEM FILTRO</p>
+
+      <nav class="nav" aria-label="Principal">
+        <a class="at" style="--x:88.5"  href="#loja">Loja</a>
+        <a class="at" style="--x:241"   href="#manifesto">Manifesto</a>
+        <a class="at" style="--x:441"   href="#ingredientes">Ingredientes</a>
+        <a class="at" style="--x:999.5" href="#onde-achar">Onde achar</a>
+        <a class="at" style="--x:1176"  href="#kits">Kits</a>
+        <a class="at" style="--x:1352"  href="#redes">Redes</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="hero" data-active="manga">
+    <!-- Camada 1: colunas clicáveis -->
+    <div class="hero__cols" role="tablist" aria-label="Sabores">
+      <button class="col manga is-active" data-flavor="manga" role="tab" aria-label="Manga Sacana"></button>
+      <button class="col guarana" data-flavor="guarana" role="tab" aria-label="Guaraná Baixaria"></button>
+      <button class="col acai"    data-flavor="acai"    role="tab" aria-label="Açaízudo"></button>
+      <button class="col coco"    data-flavor="coco"    role="tab" aria-label="Coco Saliente"></button>
+    </div>
+
+    <!-- Camada 2: latas e textos -->
+    <div class="hero__cans">
+
+      <section class="flavor manga is-active" data-flavor="manga">
+        <div class="can-frame"><img class="can" src="assets/lata-manga-sacana.png" alt="Lata de BRUTO Manga Sacana" /></div>
+        <p class="flavor-name" aria-hidden="true">MANGA<br />SACANA</p>
+        <div class="copy-block">
+          <p class="eyebrow at" style="--x:128; --y:111">SOL DE RACHAR • 350ML</p>
+          <h2 class="title at" style="--x:240; --y:173.5">MANGA SACANA</h2>
+          <div class="desc at" style="--x:240; --y:319.5">
+            <p>Doce na medida certa para baixar sua guarda, ácido o suficiente para ligar o motor no talo.</p>
+            <p>Manga madura com porrada de maracujá gelado, feito para o asfalto quente, o rolê improvisado e quem não segue roteiro.</p>
+          </div>
+          <span class="pill" style="--x:68;  --y:423">[ MANGA + MARACUJÁ ]</span>
+          <span class="pill" style="--x:262; --y:423">[ ALTA CAFEÍNA ]</span>
+        </div>
+      </section>
+
+      <section class="flavor guarana" data-flavor="guarana">
+        <div class="can-frame"><img class="can" src="assets/lata-guarana-baixaria.png" alt="Lata de BRUTO Guaraná Baixaria" /></div>
+        <p class="flavor-name" aria-hidden="true">GUARANÁ<br />BAIXARIA</p>
+        <div class="copy-block">
+          <p class="eyebrow at" style="--x:137; --y:121">ALTA VOLTAGEM • 350ML</p>
+          <h2 class="title at" style="--x:272.5; --y:194.5; --tw:557">GUARANÁ BAIXARIA</h2>
+          <div class="desc at" style="--x:249; --y:321.5">
+            <p>O combo clássico brasileiro elevado ao limite.</p>
+            <p>Guaraná raiz, erva-mate tostada e limão espremido no talo para dar aquele tranco limpo no sistema.</p>
+            <p>É energia de quem chega antes, fica até o fim e ainda puxa o próximo destino.</p>
+          </div>
+          <span class="pill" style="--x:65;  --y:425">[ GUARANÁ + LIMÃO + MATE ]</span>
+          <span class="pill" style="--x:287; --y:425">[ TRIPLE BOOST ]</span>
+        </div>
+      </section>
+
+      <section class="flavor acai" data-flavor="acai">
+        <div class="can-frame"><img class="can" src="assets/lata-acaizudo.png" alt="Lata de BRUTO Açaízudo" /></div>
+        <p class="flavor-name" aria-hidden="true">AÇAÍZUDO</p>
+        <div class="copy-block">
+          <p class="eyebrow at" style="--x:140; --y:156">CARGA AMAZÔNICA • 350ML</p>
+          <h2 class="title at" style="--x:262.5; --y:195.5; --tw:541">AÇAÍZUDO</h2>
+          <div class="desc at" style="--x:239; --y:306.5">
+            <p>Direto do norte sem pedir licença.</p>
+            <p>Açaí denso cruzado com a acidez selvagem do cupuaçu para quem encara trilha fechada, virada de noite ou qualquer parada fora do mapa.</p>
+            <p>Zero frescura, energia bruta até a última gota.</p>
+          </div>
+          <span class="pill" style="--x:67;  --y:402">[ AÇAÍ + CUPUAÇU ]</span>
+          <span class="pill" style="--x:230; --y:402">[ CARGA AMAZÔNICA ]</span>
+        </div>
+      </section>
+
+      <section class="flavor coco" data-flavor="coco">
+        <div class="can-frame"><img class="can" src="assets/lata-coco-saliente.png" alt="Lata de BRUTO Coco Saliente" /></div>
+        <p class="flavor-name" aria-hidden="true">COCO SALIENTE</p>
+        <div class="copy-block">
+          <p class="eyebrow at" style="--x:206; --y:139">RESSACA ZERO • 350ML</p>
+          <h2 class="title at" style="--x:278.5; --y:207.5; --tw:557">COCO SALIENTE</h2>
+          <div class="desc at" style="--x:272; --y:369.5">
+            <p>Cremoso, gelado e cheio de marra.</p>
+            <p>Água de coco fresca com banana madura numa mistura tropical que hidrata enquanto liga o motor no máximo.</p>
+            <p>O combustível oficial do pós-praia, do skate no fim de tarde e de quem transforma qualquer canto em litoral.</p>
+          </div>
+          <span class="pill" style="--x:104; --y:468">[ COCO + BANANA ]</span>
+          <span class="pill" style="--x:267; --y:468">[ HIDRATAÇÃO + ENERGIA ]</span>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    {
+      const hero = document.querySelector(".hero");
+      const cols = [...document.querySelectorAll(".col")];
+      const flavors = [...document.querySelectorAll(".flavor")];
+      const slugs = { manga: "manga-sacana", guarana: "guarana-baixaria", acai: "acaizudo", coco: "coco-saliente" };
+      const bySlug = Object.fromEntries(Object.entries(slugs).map(([k, v]) => [v, k]));
+
+      const activate = (key, push = true) => {
+        if (!slugs[key]) key = "manga";
+        hero.dataset.active = key;
+        cols.forEach(c => {
+          const on = c.dataset.flavor === key;
+          c.classList.toggle("is-active", on);
+          c.setAttribute("aria-selected", on);
+        });
+        flavors.forEach(f => f.classList.toggle("is-active", f.dataset.flavor === key));
+        if (push && location.hash !== "#" + slugs[key]) history.replaceState(null, "", "#" + slugs[key]);
+      };
+
+      const hover = (key, on) =>
+        flavors.forEach(f => f.dataset.flavor === key && f.classList.toggle("is-hover", on));
+
+      cols.forEach(c => {
+        const key = c.dataset.flavor;
+        c.addEventListener("click", () => activate(key));
+        c.addEventListener("pointerenter", () => hover(key, true));
+        c.addEventListener("pointerleave", () => hover(key, false));
+        c.addEventListener("focus", () => hover(key, true));
+        c.addEventListener("blur", () => hover(key, false));
+      });
+
+      // setas do teclado trocam de sabor
+      document.addEventListener("keydown", e => {
+        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+        const keys = Object.keys(slugs);
+        const i = keys.indexOf(hero.dataset.active);
+        const next = keys[(i + (e.key === "ArrowRight" ? 1 : keys.length - 1)) % keys.length];
+        activate(next);
+        cols[keys.indexOf(next)].focus();
+      });
+
+      addEventListener("hashchange", () => activate(bySlug[location.hash.slice(1)], false));
+      activate(bySlug[location.hash.slice(1)] || "manga", false);
+    }
+  </script>
+</body>
+</html>
