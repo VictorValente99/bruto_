@@ -411,7 +411,7 @@
         container-type: size;
         /* altura da lata: o que sobra abaixo das pílulas, deixando o nome
            do sabor (~80% da lata) acima dos pontinhos e da tab bar */
-        --hc: clamp(calc(240 * var(--m)), calc((100cqh - 172 * var(--m)) / .8), calc(520 * var(--m)));
+        --hc: clamp(calc(240 * var(--m)), calc((100cqh - 100 * var(--m)) / .92), calc(580 * var(--m)));
       }
       .flavor .can,
       .flavor.is-active .can,
@@ -433,17 +433,17 @@
       /* pontinhos: qual sabor está na tela */
       .dots {
         position: fixed;
-        left: 50%;
-        bottom: calc(24 * var(--m) + 64 * var(--m) + 12 * var(--m));
+        top: calc(28 * var(--m));
+        right: calc(16 * var(--m));
         z-index: 6;
         display: flex;
+        flex-direction: column;
         gap: calc(8 * var(--m));
-        padding: calc(7 * var(--m)) calc(10 * var(--m));
+        padding: calc(10 * var(--m)) calc(7 * var(--m));
         border-radius: 999px;
         background: rgba(18,18,21,.45);
         -webkit-backdrop-filter: blur(8px);
         backdrop-filter: blur(8px);
-        transform: translateX(-50%);
       }
       .dots button {
         width: calc(8 * var(--m));
@@ -452,9 +452,9 @@
         background: currentColor;
         color: #fff;
         opacity: .45;
-        transition: width .3s var(--ease), opacity .3s ease, color .4s ease;
+        transition: height .3s var(--ease), opacity .3s ease;
       }
-      .dots button[aria-current="true"] { width: calc(22 * var(--m)); opacity: 1; }
+      .dots button[aria-current="true"] { height: calc(22 * var(--m)); opacity: 1; }
 
       /* tab bar flutuante */
       .tabbar {
@@ -501,7 +501,7 @@
       .desc p + p { margin-top: calc(8 * var(--m)); }
       .tags { margin-top: calc(20 * var(--m)); }
       .can-frame, .flavor.is-active .can-frame {
-        --hc: clamp(calc(200 * var(--m)), calc((100cqh - 164 * var(--m)) / .8), calc(520 * var(--m)));
+        --hc: clamp(calc(200 * var(--m)), calc((100cqh - 96 * var(--m)) / .92), calc(580 * var(--m)));
       }
     }
 
