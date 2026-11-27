@@ -83,8 +83,8 @@
     .tagline {
       --x: 720.5;
       --y: 183.5;
+      --ls: calc(4.8 * var(--px));
       font: 700 calc(16 * var(--px)) / normal var(--font-ui);
-      letter-spacing: calc(4.8 * var(--px));
       white-space: nowrap;
     }
 
@@ -225,66 +225,80 @@
       top: calc(428 * var(--px));
       width: calc(140 * var(--px));
       transform: translate(-50%, -50%);
-      font: 700 calc(20 * var(--px)) / normal var(--font-ui);
-      letter-spacing: calc(6 * var(--px));
+      --ls: calc(6 * var(--px));
+      font: 700 calc(20 * var(--px)) / 1.4 var(--font-ui);
       color: #fff;
       text-align: center;
       transition: opacity .3s ease .45s;
     }
     .flavor.is-active .flavor-name { opacity: 0; transition-delay: 0s; }
 
-    /* textos do sabor expandido (posições do Figma, relativas ao painel de 900px) */
+    /* textos do sabor expandido: uma pilha centralizada, igual nos 4 sabores.
+       Escala de espaços: 12 (eyebrow→título) · 24 (título→texto) · 32 (texto→pílulas) */
     .copy-block {
+      --gap-s: calc(12 * var(--px));
+      --gap-m: calc(24 * var(--px));
+      --gap-l: calc(32 * var(--px));
       position: absolute;
-      inset: 0 auto 0 calc((100cqw - 900 * var(--px)) / 2);
-      width: calc(900 * var(--px));
+      /* coluna de texto: 520px, centrada em x=260 do painel de 900px */
+      left: calc((100cqw - 900 * var(--px)) / 2);
+      top: calc(300 * var(--px));               /* centro vertical da pilha */
+      width: calc(520 * var(--px));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
       color: var(--ink, #000);
       opacity: 0;
       visibility: hidden;
-      transform: translateY(calc(16 * var(--px)));
+      transform: translateY(calc(-50% + 16 * var(--px)));
       transition: opacity .25s ease, transform .25s ease, visibility 0s .25s;
     }
     .flavor.is-active .copy-block {
       opacity: 1;
       visibility: visible;
-      transform: none;
+      transform: translateY(-50%);
       transition: opacity .5s ease .45s, transform .6s var(--ease) .45s, visibility 0s;
     }
     .coco .copy-block { --ink: #f4f4f5; }
 
+    /* letter-spacing deixa um espaço sobrando depois da última letra;
+       o padding-left igual compensa e mantém o texto centrado de verdade */
+    .eyebrow, .title, .flavor-name, .tagline { padding-left: var(--ls); letter-spacing: var(--ls); }
+
     .eyebrow {
-      width: calc(350 * var(--px));
-      font: 400 calc(11 * var(--px)) / normal var(--font-ui);
-      letter-spacing: calc(0.88 * var(--px));
-      color: var(--eyebrow, #655814);
-      text-align: center;
+      --ls: calc(2.4 * var(--px));
+      font: 700 calc(12 * var(--px)) / 1 var(--font-ui);
+      opacity: .7;
     }
-    .coco .eyebrow { --eyebrow: #f4f4f5; }
 
     .title {
-      width: calc(var(--tw, 420) * var(--px));
-      font: 400 calc(52 * var(--px)) / normal var(--font-display);
-      letter-spacing: calc(31.2 * var(--px));
-      text-align: center;
+      --ls: calc(24 * var(--px));
+      margin-top: var(--gap-s);
+      text-wrap: balance;
+      font: 400 calc(52 * var(--px)) / 1.1 var(--font-display);
     }
 
     .desc {
       width: calc(420 * var(--px));
-      font: 400 calc(15 * var(--px)) / normal var(--font-body);
-      letter-spacing: calc(1.5 * var(--px));
-      text-align: center;
+      margin-top: var(--gap-m);
+      font: 400 calc(15 * var(--px)) / 1.55 var(--font-body);
+      letter-spacing: calc(.6 * var(--px));
+      text-wrap: pretty;               /* evita palavra sozinha na última linha */
     }
-    .desc p + p { margin-top: 1.2em; }
+    .desc p + p { margin-top: calc(12 * var(--px)); }
 
+    .tags {
+      display: flex;
+      gap: calc(8 * var(--px));
+      margin-top: var(--gap-l);
+    }
     .pill {
-      position: absolute;
-      left: calc(var(--x) * var(--px));
-      top: calc(var(--y) * var(--px));
-      padding: calc(6 * var(--px)) calc(14 * var(--px));
+      padding: calc(8 * var(--px)) calc(16 * var(--px));
       border-radius: 999px;
       background: rgba(0,0,0,.85);
       color: var(--yellow);
-      font: 700 calc(11 * var(--px)) / normal var(--font-ui);
+      font: 700 calc(11 * var(--px)) / 1 var(--font-ui);
       letter-spacing: calc(1.1 * var(--px));
       white-space: nowrap;
     }
@@ -331,14 +345,16 @@
         <div class="can-frame"><img class="can" src="assets/lata-manga-sacana.png" alt="Lata de BRUTO Manga Sacana" /></div>
         <p class="flavor-name" aria-hidden="true">MANGA<br />SACANA</p>
         <div class="copy-block">
-          <p class="eyebrow at" style="--x:128; --y:111">SOL DE RACHAR • 350ML</p>
-          <h2 class="title at" style="--x:240; --y:173.5">MANGA SACANA</h2>
-          <div class="desc at" style="--x:240; --y:319.5">
+          <p class="eyebrow">SOL DE RACHAR • 350ML</p>
+          <h2 class="title">MANGA SACANA</h2>
+          <div class="desc">
             <p>Doce na medida certa para baixar sua guarda, ácido o suficiente para ligar o motor no talo.</p>
             <p>Manga madura com porrada de maracujá gelado, feito para o asfalto quente, o rolê improvisado e quem não segue roteiro.</p>
           </div>
-          <span class="pill" style="--x:68;  --y:423">[ MANGA + MARACUJÁ ]</span>
-          <span class="pill" style="--x:262; --y:423">[ ALTA CAFEÍNA ]</span>
+          <div class="tags">
+            <span class="pill">[ MANGA + MARACUJÁ ]</span>
+            <span class="pill">[ ALTA CAFEÍNA ]</span>
+          </div>
         </div>
       </section>
 
@@ -346,15 +362,17 @@
         <div class="can-frame"><img class="can" src="assets/lata-guarana-baixaria.png" alt="Lata de BRUTO Guaraná Baixaria" /></div>
         <p class="flavor-name" aria-hidden="true">GUARANÁ<br />BAIXARIA</p>
         <div class="copy-block">
-          <p class="eyebrow at" style="--x:137; --y:121">ALTA VOLTAGEM • 350ML</p>
-          <h2 class="title at" style="--x:272.5; --y:186.5; --tw:557">GUARANÁ BAIXARIA</h2>
-          <div class="desc at" style="--x:249; --y:338.5">
+          <p class="eyebrow">ALTA VOLTAGEM • 350ML</p>
+          <h2 class="title">GUARANÁ BAIXARIA</h2>
+          <div class="desc">
             <p>O combo clássico brasileiro elevado ao limite.</p>
             <p>Guaraná raiz, erva-mate tostada e limão espremido no talo para dar aquele tranco limpo no sistema.</p>
             <p>É energia de quem chega antes, fica até o fim e ainda puxa o próximo destino.</p>
           </div>
-          <span class="pill" style="--x:65;  --y:444">[ GUARANÁ + LIMÃO + MATE ]</span>
-          <span class="pill" style="--x:287; --y:444">[ TRIPLE BOOST ]</span>
+          <div class="tags">
+            <span class="pill">[ GUARANÁ + LIMÃO + MATE ]</span>
+            <span class="pill">[ TRIPLE BOOST ]</span>
+          </div>
         </div>
       </section>
 
@@ -362,15 +380,17 @@
         <div class="can-frame"><img class="can" src="assets/lata-acaizudo.png" alt="Lata de BRUTO Açaízudo" /></div>
         <p class="flavor-name" aria-hidden="true">AÇAÍZUDO</p>
         <div class="copy-block">
-          <p class="eyebrow at" style="--x:140; --y:156">CARGA AMAZÔNICA • 350ML</p>
-          <h2 class="title at" style="--x:262.5; --y:195.5; --tw:541">AÇAÍZUDO</h2>
-          <div class="desc at" style="--x:239; --y:306.5">
+          <p class="eyebrow">CARGA AMAZÔNICA • 350ML</p>
+          <h2 class="title">AÇAÍZUDO</h2>
+          <div class="desc">
             <p>Direto do norte sem pedir licença.</p>
             <p>Açaí denso cruzado com a acidez selvagem do cupuaçu para quem encara trilha fechada, virada de noite ou qualquer parada fora do mapa.</p>
             <p>Zero frescura, energia bruta até a última gota.</p>
           </div>
-          <span class="pill" style="--x:67;  --y:402">[ AÇAÍ + CUPUAÇU ]</span>
-          <span class="pill" style="--x:230; --y:402">[ CARGA AMAZÔNICA ]</span>
+          <div class="tags">
+            <span class="pill">[ AÇAÍ + CUPUAÇU ]</span>
+            <span class="pill">[ CARGA AMAZÔNICA ]</span>
+          </div>
         </div>
       </section>
 
@@ -378,15 +398,17 @@
         <div class="can-frame"><img class="can" src="assets/lata-coco-saliente.png" alt="Lata de BRUTO Coco Saliente" /></div>
         <p class="flavor-name" aria-hidden="true">COCO SALIENTE</p>
         <div class="copy-block">
-          <p class="eyebrow at" style="--x:206; --y:139">RESSACA ZERO • 350ML</p>
-          <h2 class="title at" style="--x:278.5; --y:207.5; --tw:557">COCO SALIENTE</h2>
-          <div class="desc at" style="--x:272; --y:369.5">
+          <p class="eyebrow">RESSACA ZERO • 350ML</p>
+          <h2 class="title">COCO SALIENTE</h2>
+          <div class="desc">
             <p>Cremoso, gelado e cheio de marra.</p>
             <p>Água de coco fresca com banana madura numa mistura tropical que hidrata enquanto liga o motor no máximo.</p>
             <p>O combustível oficial do pós-praia, do skate no fim de tarde e de quem transforma qualquer canto em litoral.</p>
           </div>
-          <span class="pill" style="--x:104; --y:468">[ COCO + BANANA ]</span>
-          <span class="pill" style="--x:267; --y:468">[ HIDRATAÇÃO + ENERGIA ]</span>
+          <div class="tags">
+            <span class="pill">[ COCO + BANANA ]</span>
+            <span class="pill">[ HIDRATAÇÃO + ENERGIA ]</span>
+          </div>
         </div>
       </section>
 
