@@ -347,7 +347,7 @@
       .hero__cans::-webkit-scrollbar { display: none; }
 
       .flavor {
-        height: 100svh;
+        min-height: 100svh;
         display: flex;
         flex-direction: column;
         padding-top: calc(114 * var(--m));
@@ -406,30 +406,33 @@
         position: relative;
         inset: auto;
         order: 2;
-        flex: 1;
+        flex: 1 0 auto;
         overflow: visible;
-        container-type: size;
+        /* espaço mínimo para a lata com o nome do sabor acima da tab bar;
+           se não couber na tela, o sabor fica um pouco mais longo */
+        min-height: calc(16 * var(--m) + .86 * var(--lv) + 100 * var(--m));
       }
       .flavor .can,
       .flavor.is-active .can,
       .flavor.is-hover .can {
         left: 52%;
         /* --lv: comprimento visível da lata, igual nos 4 sabores (definido no JS
-           pelo sabor com menos espaço). --f: quanto do PNG a lata ocupa.
-           Ancorada embaixo: o nome do sabor fica na mesma altura em todos. */
-        top: calc(100cqh - 80 * var(--m) - .3943 * var(--lv));
+           pelo sabor com menos espaço). --f: quanto do PNG a lata ocupa;
+           --cy: centro real da lata no PNG. A lata fica logo abaixo das pílulas. */
+        top: calc(16 * var(--m) + .54 * var(--lv));
         width: calc(var(--lv) / var(--f) * var(--w) / var(--h));
         height: calc(var(--lv) / var(--f));
+        transform-origin: var(--ox) var(--cy);
         transform:
-          translate(calc(var(--ox) * -1), calc(var(--oy) * -1))
+          translate(calc(var(--ox) * -1), calc(var(--cy) * -1))
           rotate(var(--r-mobile));
         transition: none;
       }
       .hero__cans { --lv: calc(330 * var(--m)); }
-      .manga   .can { --r-mobile: 0deg;  --f: .8421; }
-      .guarana .can { --r-mobile: 16deg; --f: .6106; }
-      .acai    .can { --r-mobile: 18deg; --f: .6096; }
-      .coco    .can { --r-mobile: 14deg; --f: .5995; }
+      .manga   .can { --r-mobile: 0deg;  --f: .8421; --cy: 49.5%; }
+      .guarana .can { --r-mobile: 16deg; --f: .6106; --cy: 47.8%; }
+      .acai    .can { --r-mobile: 18deg; --f: .6096; --cy: 47.8%; }
+      .coco    .can { --r-mobile: 14deg; --f: .5995; --cy: 47.4%; }
 
       /* pontinhos: qual sabor está na tela */
       .dots {
@@ -716,12 +719,30 @@
       const sizeCans = () => {
         if (!mobile.matches) return;
         const m = innerWidth / 393;
-        const fit = Math.min(...frames.map(fr => (fr.clientHeight - 100 * m) / .92 * 1.0651));
-        const lv = Math.max(200 * m, Math.min(fit, 600 * m));
+        // espaço livre abaixo das pílulas em cada sabor, numa tela; o nome do
+        // sabor (~86% da lata, já inclinada) termina acima da tab bar
+        const screen = scroller.clientHeight;
+        const fit = Math.min(...frames.map(fr => (screen - fr.offsetTop - 16 * m - 100 * m) / .86));
+        const lv = Math.max(280 * m, Math.min(fit, 600 * m));
         scroller.style.setProperty("--lv", lv + "px");
       };
       sizeCans();
       addEventListener("resize", sizeCans);
+
+      // em telas baixas o sabor pode ser mais longo que a tela: o logo fixo
+      // some enquanto a pessoa rola dentro dele, para não cobrir o título
+      const logo = document.querySelector(".logo");
+      let ticking = false;
+      scroller.addEventListener("scroll", () => {
+        if (ticking || !mobile.matches) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          const y = scroller.scrollTop;
+          const into = Math.min(...flavors.map(f => Math.abs(y - f.offsetTop)));
+          logo.style.opacity = Math.max(0, 1 - into / 40);
+          ticking = false;
+        });
+      }, { passive: true });
       document.fonts?.ready.then(sizeCans);
 
       dots.forEach(d => d.addEventListener("click", () => scrollToFlavor(d.dataset.flavor, "smooth")));
