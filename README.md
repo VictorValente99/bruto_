@@ -40,7 +40,9 @@ O raciocínio por trás da marca (arquétipos de Jung, posicionamento, tom de vo
 
 | Caminho | O que é |
 |---|---|
-| `index.html` | A página inteira (estrutura, estilos e script) |
+| `index.html` | Estrutura da página |
+| `css/style.css` | Estilos (desktop e mobile) |
+| `js/main.js` | Interações: acordeão, rolagem por sabor, pontinhos |
 | `assets/` | Logo e imagens das latas |
 | `design/manga-sacana-expanded.pdf` | Export do Figma do layout desktop com o Manga Sacana aberto |
 | `docs/estudo-de-design.md` | Estudo de design: arquétipos, posicionamento, voz, tipografia e cores |
