@@ -16,6 +16,10 @@ Ferramentas usadas no processo:
 - **Dreamina**: geração das imagens das latas
 - **Claude** e **Gemini**: aprimoramento e polimento do design e do código
 
+## Estudo de design
+
+O raciocínio por trás da marca (arquétipos de Jung, posicionamento, tom de voz, tipografia e cores) está em **[docs/estudo-de-design.md](docs/estudo-de-design.md)**. A base é o sistema de 12 arquétipos de Mark & Pearson e o e-book *Tipografia e Arquétipos*, de Marcelo Kimura.
+
 ## O que tem na página
 
 ### Desktop
@@ -39,6 +43,7 @@ Ferramentas usadas no processo:
 | `index.html` | A página inteira (estrutura, estilos e script) |
 | `assets/` | Logo e imagens das latas |
 | `design/manga-sacana-expanded.pdf` | Export do Figma do layout desktop com o Manga Sacana aberto |
+| `docs/estudo-de-design.md` | Estudo de design: arquétipos, posicionamento, voz, tipografia e cores |
 
 ## Rodar localmente
 
